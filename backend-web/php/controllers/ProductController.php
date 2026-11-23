@@ -130,7 +130,7 @@ class ProductController {
             default      => 'png'
         };
 
-        $targetDir = __DIR__ . '/../uploads/products/';
+        $targetDir = __DIR__ . '/../../uploads/products/';
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }

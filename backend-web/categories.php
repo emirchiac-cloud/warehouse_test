@@ -3,7 +3,7 @@
 // Category Management View
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/controllers/CategoryController.php';
+require_once __DIR__ . '/php/controllers/CategoryController.php';
 
 $msg = '';
 $err = $_GET['error'] ?? '';

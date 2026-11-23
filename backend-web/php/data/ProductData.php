@@ -220,7 +220,7 @@ class ProductData {
 
         // Delete associated uploaded image file if not placeholder
         if (!empty($curr['image_path']) && strpos($curr['image_path'], 'placeholder') === false) {
-            $fullPath = __DIR__ . '/../' . ltrim($curr['image_path'], '/');
+            $fullPath = __DIR__ . '/../../' . ltrim($curr['image_path'], '/');
             if (file_exists($fullPath)) {
                 @unlink($fullPath);
             }

@@ -3,9 +3,9 @@
 // Main Back-Office Management Portal Dashboard
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/controllers/ProductController.php';
-require_once __DIR__ . '/controllers/CategoryController.php';
-require_once __DIR__ . '/data/ProductData.php';
+require_once __DIR__ . '/php/controllers/ProductController.php';
+require_once __DIR__ . '/php/controllers/CategoryController.php';
+require_once __DIR__ . '/php/data/ProductData.php';
 
 $baseUrl = getBaseUrl();
 

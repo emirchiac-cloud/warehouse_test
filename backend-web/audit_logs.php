@@ -3,7 +3,7 @@
 // Stock Logs Audit History View
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/controllers/LogController.php';
+require_once __DIR__ . '/php/controllers/LogController.php';
 
 $filterPlatform = $_GET['platform'] ?? '';
 $filterAction   = $_GET['action_type'] ?? '';

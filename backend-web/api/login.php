@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../controllers/AuthController.php';
+require_once __DIR__ . '/../php/controllers/AuthController.php';
 
 try {
     $rawInput = file_get_contents('php://input');

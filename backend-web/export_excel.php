@@ -3,7 +3,7 @@
 // Dynamic Excel Spreadsheet Export with Native Excel Formulas
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/data/ProductData.php';
+require_once __DIR__ . '/php/data/ProductData.php';
 
 $filterCategory = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
 $products = ProductData::getAll([

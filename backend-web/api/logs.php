@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../controllers/LogController.php';
+require_once __DIR__ . '/../php/controllers/LogController.php';
 
 try {
     $platform   = isset($_GET['platform']) ? trim($_GET['platform']) : '';

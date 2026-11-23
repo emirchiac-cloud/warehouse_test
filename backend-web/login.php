@@ -12,7 +12,7 @@ if (isset($_SESSION['user_id'])) {
     exit;
 }
 
-require_once __DIR__ . '/controllers/AuthController.php';
+require_once __DIR__ . '/php/controllers/AuthController.php';
 
 $error = $_GET['error'] ?? '';
 

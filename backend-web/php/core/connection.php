@@ -1,5 +1,5 @@
 <?php
-// core/connection.php
+// php/core/connection.php
 // Centralized Database Connection using PDO for MySQL (inventory_system)
 
 if (!defined('DB_HOST')) define('DB_HOST', '127.0.0.1');
@@ -50,7 +50,7 @@ function getBaseUrl(): string {
     $parts = explode('/', trim(str_replace('\\', '/', $scriptDir), '/'));
     $baseParts = [];
     foreach ($parts as $part) {
-        if ($part === 'api' || $part === 'config' || $part === 'core' || $part === 'controllers' || $part === 'data' || $part === 'ac') {
+        if ($part === 'api' || $part === 'config' || $part === 'core' || $part === 'controllers' || $part === 'data' || $part === 'ac' || $part === 'php') {
             break;
         }
         if ($part !== '') {

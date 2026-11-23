@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">CEMJC Warehouse</string>
-    <string name="low_stock_warning_title">Low Stock Warning</string>
-    <string name="low_stock_channel_name">Warehouse Stock Alerts</string>
-    <string name="low_stock_channel_desc">Alerts when inventory counts drop below minimum threshold</string>
-</resources>

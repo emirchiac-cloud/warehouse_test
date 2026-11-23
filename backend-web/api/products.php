@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../controllers/ProductController.php';
+require_once __DIR__ . '/../php/controllers/ProductController.php';
 
 // Detect HTTP method including _method override for multipart PUT/DELETE
 $rawMethod = $_SERVER['REQUEST_METHOD'];
