@@ -3,25 +3,13 @@
 // Dynamic Excel Spreadsheet Export with Native Excel Formulas
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/data/ProductData.php';
 
-$pdo = getDBConnection();
 $filterCategory = isset($_GET['category_id']) ? (int)$_GET['category_id'] : 0;
-
-$sql = "SELECT p.*, c.name AS category_name 
-        FROM products p 
-        INNER JOIN categories c ON p.category_id = c.id 
-        WHERE 1=1";
-$params = [];
-if ($filterCategory > 0) {
-    $sql .= " AND p.category_id = ?";
-    $params[] = $filterCategory;
-}
-$sql .= " ORDER BY c.name ASC, p.name ASC";
-
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$products = $stmt->fetchAll();
+$products = ProductData::getAll([
+    'category_id' => $filterCategory ?: null,
+    'sort'        => 'name'
+]);
 
 $filename = "Inventory_Valuation_Report_" . date('Y-m-d_His') . ".xls";
 

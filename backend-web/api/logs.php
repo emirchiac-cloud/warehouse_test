@@ -1,6 +1,6 @@
 <?php
-// backend-web/api/logs.php
-// REST API for Stock Logs & Audit Trail
+// api/logs.php
+// REST API endpoint for stock logs audit trail, delegating to LogController
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
@@ -12,37 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../controllers/LogController.php';
 
 try {
-    $pdo = getDBConnection();
+    $platform   = isset($_GET['platform']) ? trim($_GET['platform']) : '';
+    $actionType = isset($_GET['action_type']) ? trim($_GET['action_type']) : '';
+    $limit      = isset($_GET['limit']) ? min((int)$_GET['limit'], 200) : 50;
 
-    $productId = isset($_GET['product_id']) ? (int)$_GET['product_id'] : null;
-    $platform  = isset($_GET['platform']) ? trim($_GET['platform']) : null;
-    $limit     = isset($_GET['limit']) ? min((int)$_GET['limit'], 200) : 50;
-
-    $sql = "SELECT sl.*, p.name AS product_name, p.sku AS product_sku, u.full_name AS user_name, u.email AS user_email 
-            FROM stock_logs sl
-            LEFT JOIN products p ON sl.product_id = p.id
-            LEFT JOIN users u ON sl.user_id = u.id
-            WHERE 1=1";
-    $params = [];
-
-    if ($productId !== null && $productId > 0) {
-        $sql .= " AND sl.product_id = ?";
-        $params[] = $productId;
-    }
-
-    if (!empty($platform) && in_array(strtoupper($platform), ['WEB', 'MOBILE'])) {
-        $sql .= " AND sl.platform = ?";
-        $params[] = strtoupper($platform);
-    }
-
-    $sql .= " ORDER BY sl.id DESC LIMIT " . $limit;
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-    $logs = $stmt->fetchAll();
+    $logs = LogController::index($limit, $actionType, $platform);
 
     http_response_code(200);
     echo json_encode($logs);

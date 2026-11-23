@@ -3,33 +3,12 @@
 // Stock Logs Audit History View
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/config/db.php';
-
-$pdo = getDBConnection();
+require_once __DIR__ . '/controllers/LogController.php';
 
 $filterPlatform = $_GET['platform'] ?? '';
 $filterAction   = $_GET['action_type'] ?? '';
 
-$sql = "SELECT sl.*, p.name AS product_name, p.sku AS product_sku, u.full_name AS user_name, u.role AS user_role 
-        FROM stock_logs sl
-        LEFT JOIN products p ON sl.product_id = p.id
-        LEFT JOIN users u ON sl.user_id = u.id
-        WHERE 1=1";
-$params = [];
-
-if (!empty($filterPlatform)) {
-    $sql .= " AND sl.platform = ?";
-    $params[] = $filterPlatform;
-}
-if (!empty($filterAction)) {
-    $sql .= " AND sl.action_type = ?";
-    $params[] = $filterAction;
-}
-
-$sql .= " ORDER BY sl.id DESC LIMIT 150";
-$stmt = $pdo->prepare($sql);
-$stmt->execute($params);
-$logs = $stmt->fetchAll();
+$logs = LogController::index(150, $filterAction, $filterPlatform);
 ?>
 <!DOCTYPE html>
 <html lang="en">

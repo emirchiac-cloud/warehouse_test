@@ -3,51 +3,32 @@
 // Main Back-Office Management Portal Dashboard
 
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/config/db.php';
+require_once __DIR__ . '/controllers/ProductController.php';
+require_once __DIR__ . '/controllers/CategoryController.php';
+require_once __DIR__ . '/data/ProductData.php';
 
-$pdo = getDBConnection();
 $baseUrl = getBaseUrl();
 
 // Fetch summary metrics for KPI cards
-$kpiSql = "SELECT 
-            COUNT(*) AS total_products,
-            COALESCE(SUM(unit_price * quantity), 0) AS total_valuation,
-            COALESCE(SUM(CASE WHEN quantity < min_stock_threshold THEN 1 ELSE 0 END), 0) AS low_stock_count
-           FROM products";
-$kpiStmt = $pdo->query($kpiSql);
-$kpi = $kpiStmt->fetch();
+$metricData = ProductData::getMetrics();
+$kpi = [
+    'total_products'  => $metricData['total_skus'] ?? 0,
+    'total_valuation' => $metricData['total_valuation'] ?? 0,
+    'low_stock_count' => $metricData['low_stock_count'] ?? 0
+];
 
 // Fetch categories for filtering and modals
-$catStmt = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC");
-$categories = $catStmt->fetchAll();
+$categories = CategoryController::index();
 
 // Handle filter parameters
 $filterCategory = isset($_GET['category_id']) && $_GET['category_id'] !== '' ? (int)$_GET['category_id'] : 0;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$productsSql = "SELECT p.*, c.name AS category_name 
-                FROM products p 
-                INNER JOIN categories c ON p.category_id = c.id 
-                WHERE 1=1";
-$params = [];
-
-if ($filterCategory > 0) {
-    $productsSql .= " AND p.category_id = ?";
-    $params[] = $filterCategory;
-}
-
-if (!empty($search)) {
-    $productsSql .= " AND (p.name LIKE ? OR p.sku LIKE ? OR p.description LIKE ?)";
-    $st = "%$search%";
-    $params[] = $st;
-    $params[] = $st;
-    $params[] = $st;
-}
-
-$productsSql .= " ORDER BY (p.quantity < p.min_stock_threshold) DESC, p.id DESC";
-$prodStmt = $pdo->prepare($productsSql);
-$prodStmt->execute($params);
-$products = $prodStmt->fetchAll();
+$products = ProductController::index([
+    'category_id' => $filterCategory ?: null,
+    'search'      => $search ?: null,
+    'sort'        => 'low_stock_first'
+]);
 ?>
 <!DOCTYPE html>
 <html lang="en">

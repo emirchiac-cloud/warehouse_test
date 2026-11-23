@@ -1,6 +1,6 @@
 <?php
-// backend-web/api/login.php
-// Validates credentials and returns user JSON
+// api/login.php
+// REST API endpoint for user authentication, delegating to AuthController
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
@@ -21,78 +21,35 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../controllers/AuthController.php';
 
 try {
-    // Read JSON payload or form-encoded
-    $input = file_get_contents('php://input');
-    $data = json_decode($input, true);
-    if (!is_array($data)) {
-        $data = $_POST;
-    }
+    $rawInput = file_get_contents('php://input');
+    $json = json_decode($rawInput, true);
+    $data = is_array($json) ? $json : $_POST;
 
-    $email = trim($data['email'] ?? ($data['username'] ?? ($data['user'] ?? '')));
-    $password = trim($data['password'] ?? ($data['pwd'] ?? ''));
+    $identifier = $data['email'] ?? ($data['username'] ?? ($data['user'] ?? ''));
+    $password   = $data['password'] ?? ($data['pwd'] ?? '');
 
-    if (empty($email) || empty($password)) {
-        http_response_code(400);
-        echo json_encode([
-            'status'  => 'error',
-            'message' => 'Email and password are required.'
-        ]);
-        exit;
-    }
+    $user = AuthController::login((string)$identifier, (string)$password);
 
-    $pdo = getDBConnection();
-    // Allow either full email (e.g. admin@warehouse.com) or username prefix (admin)
-    $emailLookup = strpos($email, '@') !== false ? $email : $email . '@warehouse.com';
-    $stmt = $pdo->prepare("SELECT id, full_name, email, password_hash, role FROM users WHERE email = ? OR email = ? LIMIT 1");
-    $stmt->execute([$email, $emailLookup]);
-    $user = $stmt->fetch();
-
-    $isValid = false;
-    if ($user) {
-        if (password_verify($password, $user['password_hash']) || 
-            $user['password_hash'] === md5($password) ||
-            ($user['role'] === 'admin' && ($password === 'admin123' || $password === '123')) ||
-            ($user['role'] === 'staff' && ($password === 'staff123' || $password === '1'))) {
-            $isValid = true;
-        }
-    }
-
-    if (!$isValid) {
-        http_response_code(401);
-        echo json_encode([
-            'status'  => 'error',
-            'message' => 'Invalid email or password.'
-        ]);
-        exit;
-    }
-
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    $_SESSION['user_id']   = (int)$user['id'];
-    $_SESSION['id']        = (int)$user['id'];
-    $_SESSION['full_name'] = $user['full_name'];
-    $_SESSION['email']     = $user['email'];
-    $_SESSION['role']      = $user['role'];
-
-    // Return HTTP 200 with user JSON (id, full_name, email, role)
     http_response_code(200);
     echo json_encode([
         'status'    => 'success',
-        'id'        => (int)$user['id'],
+        'id'        => $user['id'],
         'full_name' => $user['full_name'],
         'email'     => $user['email'],
         'role'      => $user['role'],
         'message'   => 'Login successful.'
     ]);
 
+} catch (InvalidArgumentException $e) {
+    http_response_code(400);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+} catch (RuntimeException $e) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'An error occurred during authentication: ' . $e->getMessage()
-    ]);
+    echo json_encode(['status' => 'error', 'message' => 'Authentication error: ' . $e->getMessage()]);
 }
