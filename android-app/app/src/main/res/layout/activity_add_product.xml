@@ -208,7 +208,22 @@
             android:textSize="14sp"
             android:textStyle="bold"
             app:cornerRadius="10dp"
-            app:backgroundTint="@color/primary_navy" />
+            app:backgroundTint="@color/primary_navy"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Cancel / Back Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnBack"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="CANCEL / BACK"
+            android:textColor="@color/primary_navy"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:cornerRadius="10dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/primary_navy"
+            android:layout_marginBottom="24dp" />
 
         <ProgressBar
             android:id="@+id/uploadProgress"

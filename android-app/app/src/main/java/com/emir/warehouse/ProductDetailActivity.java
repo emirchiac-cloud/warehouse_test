@@ -47,6 +47,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     private TextInputEditText etDetailDesc;
     private MaterialButton btnSaveUpdate;
     private MaterialButton btnDeleteProduct;
+    private MaterialButton btnBack;
     private ProgressBar detailProgress;
 
     private Product product;
@@ -88,6 +89,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         etDetailDesc = findViewById(R.id.etDetailDesc);
         btnSaveUpdate = findViewById(R.id.btnSaveUpdate);
         btnDeleteProduct = findViewById(R.id.btnDeleteProduct);
+        btnBack = findViewById(R.id.btnBack);
         detailProgress = findViewById(R.id.detailProgress);
 
         // Populate Views with initial Product details
@@ -102,6 +104,12 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         // Listener for Delete Product with AlertDialog confirmation
         btnDeleteProduct.setOnClickListener(v -> confirmDeleteProduct());
+
+        // Listener for Back button
+        btnBack.setOnClickListener(v -> {
+            setResult(RESULT_OK);
+            finish();
+        });
     }
 
     private void bindProductData() {
@@ -256,6 +264,9 @@ public class ProductDetailActivity extends AppCompatActivity {
                     if (product.getQuantity() < minThreshold) {
                         HardwareAlertHelper.triggerLowStockAlert(ProductDetailActivity.this, product);
                     }
+
+                    setResult(RESULT_OK);
+                    finish();
                 } else {
                     Toast.makeText(ProductDetailActivity.this, "Failed to update details", Toast.LENGTH_SHORT).show();
                 }
@@ -319,6 +330,7 @@ public class ProductDetailActivity extends AppCompatActivity {
         btnQuickPlus.setEnabled(enabled);
         btnSaveUpdate.setEnabled(enabled);
         btnDeleteProduct.setEnabled(enabled);
+        btnBack.setEnabled(enabled);
     }
 
     @Override

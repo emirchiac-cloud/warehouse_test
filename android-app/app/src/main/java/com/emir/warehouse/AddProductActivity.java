@@ -118,11 +118,13 @@ public class AddProductActivity extends AppCompatActivity {
         etMinThreshold = findViewById(R.id.etMinThreshold);
         etDescription = findViewById(R.id.etDescription);
         btnSubmit = findViewById(R.id.btnSubmit);
+        MaterialButton btnBack = findViewById(R.id.btnBack);
         uploadProgress = findViewById(R.id.uploadProgress);
 
         btnCaptureCamera.setOnClickListener(v -> dispatchTakePictureIntent());
         btnPickGallery.setOnClickListener(v -> galleryLauncher.launch("image/*"));
         btnSubmit.setOnClickListener(v -> submitNewProduct());
+        btnBack.setOnClickListener(v -> finish());
 
         loadCategories();
     }
