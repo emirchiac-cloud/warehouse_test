@@ -40,255 +40,276 @@ $products = ProductController::index([
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Typeface -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #f4f6f9;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        :root {
+            --paper: #f2f2f2; --surface: #fff; --ink: #262626; --muted: #8a8a8a;
+            --line: #ececec; --accent: #ef4a4a; --pink: #fde4e6; --ok: #1e9e5a; --ok-tint: #e2f6ea;
+            --chip: #f3f3f3;
         }
-        .card-kpi {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
-        }
-        .card-kpi:hover {
-            transform: translateY(-3px);
-        }
-        .kpi-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-        }
-        .table-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-            overflow: hidden;
-        }
-        .product-thumb {
-            width: 48px;
-            height: 48px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            background: #fff;
-        }
-        .badge-low-stock {
-            background-color: #dc3545;
-            color: #fff;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.75; }
-            100% { opacity: 1; }
-        }
-        .row-low-stock {
-            background-color: #fff8f8 !important;
-        }
-        .btn-qty {
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            border-radius: 6px;
-        }
+        body { background: var(--paper); color: var(--ink); font-family: 'Figtree', system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+        h1, h2, h3, h4, h5 { letter-spacing: -0.01em; }
+        .text-muted { color: var(--muted) !important; }
+        :focus-visible { outline: 3px solid rgba(239,74,74,.4); outline-offset: 2px; }
+
+        .btn { border-radius: 10px; font-weight: 600; }
+        .btn-primary { --bs-btn-bg: var(--ink); --bs-btn-border-color: var(--ink); --bs-btn-hover-bg: #000; --bs-btn-hover-border-color: #000; --bs-btn-active-bg: #000; --bs-btn-active-border-color: #000; }
+        .btn-quiet { background: var(--chip); border: 1px solid transparent; color: var(--ink); }
+        .btn-quiet:hover { background: #e9e9e9; color: var(--ink); }
+        .form-control, .form-select, .input-group-text { border-radius: 10px; border-color: var(--line); background-color: var(--chip); }
+        .form-control:focus, .form-select:focus { border-color: var(--ink); box-shadow: 0 0 0 .2rem rgba(38,38,38,.1); background-color: #fff; }
+
+        .page-title { font-size: 1.7rem; font-weight: 600; margin: 0; }
+        .crumbs { font-size: .95rem; color: var(--muted); }
+        .crumbs a { color: var(--accent); text-decoration: none; }
+
+        .card-x { background: var(--surface); border-radius: 16px; padding: 1.25rem 1.4rem; }
+        .card-x h5 { font-size: 1.15rem; font-weight: 500; margin: 0 0 1rem; }
+
+        .dash { display: grid; grid-template-columns: 250px minmax(0, 1fr) 300px; gap: 1rem; }
+        .dash-stats { display: flex; flex-direction: column; gap: 1rem; }
+        @media (max-width: 1199.98px) { .dash { grid-template-columns: 1fr 1fr; } .dash-stats { grid-column: 1 / -1; flex-direction: row; } .dash-stats > * { flex: 1; } }
+        @media (max-width: 767.98px) { .dash { grid-template-columns: 1fr; } .dash-stats { flex-direction: column; } }
+
+        .stat-label { color: var(--muted); font-size: .95rem; }
+        .stat-value { font-size: 1.9rem; font-weight: 600; line-height: 1.25; margin-top: .3rem; }
+        .stat-value small { font-size: .95rem; font-weight: 400; color: var(--muted); }
+        .stat-alert .stat-value { color: var(--accent); }
+
+        /* Stock by category */
+        .cat-chart { display: flex; gap: .75rem; }
+        .cat-col { flex: 1; text-align: center; min-width: 0; }
+        .cat-name { font-size: .8rem; color: var(--muted); height: 2.5em; line-height: 1.25; overflow: hidden; }
+        .cat-track { height: 140px; margin: .4rem 0; border-radius: 8px; background: linear-gradient(#fafafa, #e8e8e8); display: flex; align-items: flex-end; overflow: hidden; }
+        .cat-fill { width: 100%; border-radius: 6px; }
+        .hatch { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.6) 0 3px, transparent 3px 8px); }
+        .f0 { background-color: var(--accent); } .f1 { background-color: var(--accent); }
+        .f2 { background-color: var(--ink); } .f3 { background-color: var(--ink); }
+        .f4 { background-color: #8c8c8c; } .f5 { background-color: #8c8c8c; }
+        .cat-pct { font-size: .85rem; font-weight: 700; }
+        .cat-qty { font-size: .8rem; color: var(--muted); }
+
+        /* Dark donut card */
+        .card-dark { background: #2b2b2b; color: #fff; border-radius: 16px; padding: 1.25rem 1.4rem; display: flex; flex-direction: column; }
+        .card-dark h5 { font-size: 1.15rem; font-weight: 500; margin: 0 0 1rem; }
+        .donut { width: 190px; aspect-ratio: 1; border-radius: 50%; margin: .25rem auto 1rem; display: grid; place-items: center; }
+        .donut-inner { width: 76%; aspect-ratio: 1; border-radius: 50%; background: #2b2b2b; display: grid; place-content: center; text-align: center; }
+        .donut-inner small { color: #cfcfcf; }
+        .donut-inner strong { font-size: 2.1rem; font-weight: 600; line-height: 1.1; }
+        .donut-foot { display: flex; justify-content: space-between; margin-top: auto; }
+        .donut-foot span { color: #cfcfcf; font-size: .9rem; display: block; }
+        .donut-foot strong { font-weight: 600; }
+
+        /* Table */
+        .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+        .toolbar h5 { margin: 0; }
+        .table { --bs-table-hover-bg: #fafafa; margin: 0; }
+        .table thead th { background: transparent; color: var(--muted); font-size: .85rem; font-weight: 500; border-bottom: 1px solid var(--line); padding: .6rem .75rem; }
+        .table td { padding: 1rem .75rem; border-color: var(--line); }
+        .product-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 12px; background: var(--pink); }
+        .sku { font-size: .8rem; color: var(--muted); }
+        .cat-pill { font-size: .75rem; font-weight: 500; background: var(--chip); border-radius: 999px; padding: .1rem .6rem; }
+
+        .row-low-stock > td { background: #fff6f6 !important; }
+        .row-low-stock > td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+        .stock-cell { min-width: 150px; }
+        .meter { position: relative; height: 8px; background: var(--chip); border-radius: 999px; margin-top: .45rem; overflow: hidden; }
+        .meter-fill { height: 100%; background: var(--ink); border-radius: 999px; transition: width .25s ease; }
+        .meter-fill.is-low { background: var(--accent); }
+        .meter::after { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,.9); }
+        .btn-qty { width: 30px; height: 30px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; background: var(--chip); border: none; color: var(--ink); font-weight: 700; line-height: 1; }
+        .btn-qty:hover { background: #e4e4e4; }
+        .qty-val { min-width: 2.2ch; text-align: center; font-weight: 600; font-size: 1.05rem; }
+
+        .status { display: inline-block; font-size: .85rem; font-weight: 500; padding: .25rem .8rem; border-radius: 999px; }
+        .status-ok { color: var(--ok); background: var(--ok-tint); }
+        .status-low { color: var(--accent); background: var(--pink); }
+
+        .icon-btn { width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .icon-btn.danger:hover { background: var(--pink); color: var(--accent); }
+
+        .modal-content { border: none; border-radius: 16px; overflow: hidden; }
+        .modal-header.bg-primary, .modal-header.bg-dark { background: var(--ink) !important; }
+        .form-label { font-size: .9rem; }
+        @media (prefers-reduced-motion: reduce) { .meter-fill { transition: none; } }
     </style>
 </head>
 <body>
 
 <?php include __DIR__ . '/navbar.php'; ?>
 
+<?php
+// Figures for the category chart and the stock-health donut (based on the rows shown)
+$byCat = [];
+$lowShown = 0;
+foreach ($products as $p) {
+    $byCat[$p['category_name']] = ($byCat[$p['category_name']] ?? 0) + (int)$p['quantity'];
+    if ((int)$p['quantity'] < (int)$p['min_stock_threshold']) $lowShown++;
+}
+arsort($byCat);
+$byCat = array_slice($byCat, 0, 6, true);
+$unitsShown = array_sum($byCat) ?: 1;
+$maxCat = max($byCat ?: [1]) ?: 1;
+$shown = count($products);
+$healthy = $shown - $lowShown;
+$lowPct = $shown ? round($lowShown / $shown * 100) : 0;
+$healthyPct = $shown ? 100 - $lowPct : 0;
+?>
 <div class="container-fluid px-4 py-4">
 
-    <!-- KPI Summary Cards -->
-    <div class="row g-3 mb-4">
-        <!-- Total Products -->
-        <div class="col-md-4">
-            <div class="card card-kpi bg-white p-3">
-                <div class="d-flex align-items-center">
-                    <div class="kpi-icon bg-primary bg-opacity-10 text-primary me-3">
-                        <i class="bi bi-box-seam"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small fw-semibold text-uppercase">Total Catalog SKUs</div>
-                        <h3 class="fw-bold mb-0 text-dark"><?= number_format($kpi['total_products']) ?></h3>
-                    </div>
-                </div>
+    <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="page-title">Inventory</h1>
+            <div class="crumbs"><a href="index.php">Dashboard</a> / Inventory</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="export_pdf.php<?= $filterCategory ? '?category_id=' . $filterCategory : '' ?>" class="btn btn-quiet btn-sm px-3" target="_blank"><i class="bi bi-file-earmark-pdf me-1"></i> PDF report</a>
+            <a href="export_excel.php<?= $filterCategory ? '?category_id=' . $filterCategory : '' ?>" class="btn btn-quiet btn-sm px-3"><i class="bi bi-file-earmark-excel me-1"></i> Excel report</a>
+            <button class="btn btn-primary btn-sm px-3" data-bs-toggle="modal" data-bs-target="#addProductModal"><i class="bi bi-plus-lg me-1"></i> Add product</button>
+        </div>
+    </div>
+
+    <div class="dash mb-3">
+        <div class="dash-stats">
+            <div class="card-x">
+                <div class="stat-label">Total SKUs</div>
+                <div class="stat-value"><?= number_format($kpi['total_products']) ?> <small>products</small></div>
+            </div>
+            <div class="card-x">
+                <div class="stat-label">Inventory value</div>
+                <div class="stat-value" id="kpi-valuation" data-value="<?= (float)$kpi['total_valuation'] ?>">$<?= number_format($kpi['total_valuation'], 2) ?></div>
+            </div>
+            <div class="card-x stat-alert">
+                <div class="stat-label">Needs restocking</div>
+                <div class="stat-value"><span id="kpi-low" data-count="<?= (int)$kpi['low_stock_count'] ?>"><?= number_format($kpi['low_stock_count']) ?></span> <small>items</small></div>
             </div>
         </div>
 
-        <!-- Total Inventory Valuation -->
-        <div class="col-md-4">
-            <div class="card card-kpi bg-white p-3">
-                <div class="d-flex align-items-center">
-                    <div class="kpi-icon bg-success bg-opacity-10 text-success me-3">
-                        <i class="bi bi-currency-dollar"></i>
+        <div class="card-x">
+            <h5>Stock by category</h5>
+            <?php if ($byCat): ?>
+            <div class="cat-chart">
+                <?php $i = 0; foreach ($byCat as $name => $q): ?>
+                    <div class="cat-col">
+                        <div class="cat-name"><?= htmlspecialchars($name) ?></div>
+                        <div class="cat-track"><div class="cat-fill f<?= $i ?> <?= $i % 2 ? 'hatch' : '' ?>" style="height: max(6%, <?= round($q / $maxCat * 100) ?>%)"></div></div>
+                        <div class="cat-pct"><?= round($q / $unitsShown * 100) ?>%</div>
+                        <div class="cat-qty"><?= number_format($q) ?> units</div>
                     </div>
-                    <div>
-                        <div class="text-muted small fw-semibold text-uppercase">Total Inventory Valuation</div>
-                        <h3 class="fw-bold mb-0 text-dark">$<?= number_format($kpi['total_valuation'], 2) ?></h3>
-                    </div>
-                </div>
+                <?php $i++; endforeach; ?>
             </div>
+            <?php else: ?>
+                <div class="text-muted py-4">No stock to chart for these filters.</div>
+            <?php endif; ?>
         </div>
 
-        <!-- Low Stock Alerts -->
-        <div class="col-md-4">
-            <div class="card card-kpi bg-white p-3 border-start border-danger border-4">
-                <div class="d-flex align-items-center">
-                    <div class="kpi-icon bg-danger bg-opacity-10 text-danger me-3">
-                        <i class="bi bi-exclamation-octagon-fill"></i>
-                    </div>
-                    <div>
-                        <div class="text-danger small fw-semibold text-uppercase">Low-Stock Alerts</div>
-                        <h3 class="fw-bold mb-0 text-danger"><?= number_format($kpi['low_stock_count']) ?> Items Below Safe Minimum</h3>
-                    </div>
+        <div class="card-dark">
+            <h5>Stock health</h5>
+            <div class="donut" style="background: conic-gradient(var(--accent) 0 <?= $lowPct ?>%, #fff <?= $lowPct ?>% 100%);">
+                <div class="donut-inner">
+                    <small>Healthy</small>
+                    <strong><?= $healthyPct ?>%</strong>
                 </div>
+            </div>
+            <div class="donut-foot">
+                <div><span>Healthy</span><strong><?= $healthy ?> items</strong></div>
+                <div class="text-end"><span>Low stock</span><strong><?= $lowShown ?> items</strong></div>
             </div>
         </div>
     </div>
 
-    <!-- Inventory Actions & Table -->
-    <div class="card table-card bg-white">
-        <div class="card-header bg-white py-3 px-4 border-bottom">
-            <div class="row align-items-center g-3">
-                <div class="col-lg-4 col-md-12">
-                    <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Warehouse Inventory</h5>
-                    <small class="text-muted">Real-time stock synchronized with native Android app</small>
+    <div class="card-x">
+        <form method="GET" action="index.php" class="toolbar">
+            <h5>Inventory items <span class="text-muted fs-6 fw-normal ms-1"><?= $shown ?> shown</span></h5>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <div class="input-group input-group-sm" style="width: 260px;">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search name, SKU or description" value="<?= htmlspecialchars($search) ?>" aria-label="Search products">
                 </div>
-                <div class="col-lg-8 col-md-12">
-                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
-                        <!-- Add Product Button -->
-                        <button class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                            <i class="bi bi-plus-circle me-1"></i> Add Product
-                        </button>
-
-                        <!-- Download PDF Button -->
-                        <a href="export_pdf.php<?= $filterCategory ? '?category_id=' . $filterCategory : '' ?>" class="btn btn-danger btn-sm rounded-pill px-3" target="_blank">
-                            <i class="bi bi-file-earmark-pdf me-1"></i> Download Valuation &amp; Low-Stock PDF
-                        </a>
-
-                        <!-- Download Excel Button -->
-                        <a href="export_excel.php<?= $filterCategory ? '?category_id=' . $filterCategory : '' ?>" class="btn btn-success btn-sm rounded-pill px-3">
-                            <i class="bi bi-file-earmark-excel me-1"></i> Download Excel Report (.xlsx)
-                        </a>
-                    </div>
-                </div>
+                <select name="category_id" class="form-select form-select-sm" style="width: 180px;" onchange="this.form.submit()" aria-label="Filter by category">
+                    <option value="">All categories</option>
+                    <?php foreach ($categories as $cat): ?>
+                        <option value="<?= $cat['id'] ?>" <?= $filterCategory === (int)$cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm px-3">Search</button>
+                <?php if ($filterCategory || $search): ?><a href="index.php" class="btn btn-quiet btn-sm">Clear</a><?php endif; ?>
             </div>
-
-            <!-- Filters -->
-            <form method="GET" action="index.php" class="row g-2 mt-3 pt-2 border-top">
-                <div class="col-md-5">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" class="form-control" placeholder="Search by name, SKU, or description..." value="<?= htmlspecialchars($search) ?>">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <select name="category_id" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">All Categories</option>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat['id'] ?>" <?= $filterCategory === (int)$cat['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($cat['name']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button type="submit" class="btn btn-secondary btn-sm flex-grow-1">Filter</button>
-                    <?php if ($filterCategory || $search): ?>
-                        <a href="index.php" class="btn btn-outline-secondary btn-sm">Reset</a>
-                    <?php endif; ?>
-                </div>
-            </form>
-        </div>
+        </form>
 
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light text-secondary text-uppercase" style="font-size: 0.78rem; letter-spacing: 0.5px;">
+            <table class="table table-hover align-middle">
+                <thead>
                     <tr>
-                        <th class="ps-4">Item</th>
-                        <th>Category</th>
-                        <th>SKU</th>
-                        <th class="text-end">Unit Price</th>
-                        <th class="text-center">Stock Count</th>
-                        <th class="text-center">Min Threshold</th>
+                        <th>Product</th>
+                        <th class="text-end">Unit price</th>
+                        <th class="text-center">Stock</th>
                         <th class="text-center">Status</th>
-                        <th class="text-end">Subtotal Valuation</th>
-                        <th class="pe-4 text-center">Actions</th>
+                        <th class="text-end">Value</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($products)): ?>
                         <tr>
-                            <td colspan="9" class="text-center py-5 text-muted">
+                            <td colspan="6" class="text-center py-5 text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                                No products found matching your filter criteria.
+                                No products match these filters. Try a different search or clear the filters.
                             </td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($products as $p): 
-                            $isLow = ((int)$p['quantity'] < (int)$p['min_stock_threshold']);
-                            $subtotal = (float)$p['unit_price'] * (int)$p['quantity'];
+                        <?php foreach ($products as $p):
+                            $qty = (int)$p['quantity'];
+                            $min = (int)$p['min_stock_threshold'];
+                            $isLow = ($qty < $min);
+                            $subtotal = (float)$p['unit_price'] * $qty;
+                            $pct = min(100, (int)round($qty / max(1, $min * 2) * 100));
                             $imgSrc = $baseUrl . '/' . ltrim($p['image_path'] ?: 'uploads/products/placeholder.png', '/');
                         ?>
-                            <tr class="<?= $isLow ? 'row-low-stock' : '' ?>" id="product-row-<?= $p['id'] ?>">
-                                <td class="ps-4">
+                            <tr class="<?= $isLow ? 'row-low-stock' : '' ?>" id="product-row-<?= $p['id'] ?>"
+                                data-price="<?= (float)$p['unit_price'] ?>" data-min="<?= $min ?>">
+                                <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($p['name']) ?>" class="product-thumb me-3">
+                                        <img src="<?= htmlspecialchars($imgSrc) ?>" alt="" class="product-thumb me-3">
                                         <div>
-                                            <div class="fw-bold text-dark"><?= htmlspecialchars($p['name']) ?></div>
-                                            <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">
-                                                <?= htmlspecialchars($p['description'] ?? '') ?>
-                                            </small>
+                                            <div class="fw-semibold"><?= htmlspecialchars($p['name']) ?></div>
+                                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                                <span class="sku"><?= htmlspecialchars($p['sku']) ?></span>
+                                                <span class="cat-pill"><?= htmlspecialchars($p['category_name']) ?></span>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border"><?= htmlspecialchars($p['category_name']) ?></span>
-                                </td>
-                                <td><code><?= htmlspecialchars($p['sku']) ?></code></td>
-                                <td class="text-end fw-semibold">$<?= number_format($p['unit_price'], 2) ?></td>
-                                <td class="text-center">
-                                    <div class="d-inline-flex align-items-center gap-1">
-                                        <button class="btn btn-outline-danger btn-qty" onclick="adjustStock(<?= $p['id'] ?>, -1)" title="Stock Out -1">
-                                            -
-                                        </button>
-                                        <span class="fw-bold px-2 fs-6 text-dark" id="qty-val-<?= $p['id'] ?>"><?= (int)$p['quantity'] ?></span>
-                                        <button class="btn btn-outline-success btn-qty" onclick="adjustStock(<?= $p['id'] ?>, 1)" title="Stock In +1">
-                                            +
-                                        </button>
+                                <td class="text-end">$<?= number_format($p['unit_price'], 2) ?></td>
+                                <td class="stock-cell text-center">
+                                    <div class="d-inline-flex align-items-center gap-2">
+                                        <button class="btn-qty" onclick="adjustStock(<?= (int)$p['id'] ?>, -1)" title="Remove 1" aria-label="Remove 1 from stock">&minus;</button>
+                                        <span class="qty-val" id="qty-val-<?= $p['id'] ?>"><?= $qty ?></span>
+                                        <button class="btn-qty" onclick="adjustStock(<?= (int)$p['id'] ?>, 1)" title="Add 1" aria-label="Add 1 to stock">+</button>
                                     </div>
+                                    <div class="meter" title="Minimum: <?= $min ?>">
+                                        <div class="meter-fill <?= $isLow ? 'is-low' : '' ?>" id="meter-<?= $p['id'] ?>" style="width: <?= $pct ?>%"></div>
+                                    </div>
+                                    <div class="text-muted small mt-1">min. <?= $min ?></div>
                                 </td>
-                                <td class="text-center text-muted fw-semibold"><?= (int)$p['min_stock_threshold'] ?></td>
                                 <td class="text-center" id="status-badge-<?= $p['id'] ?>">
                                     <?php if ($isLow): ?>
-                                        <span class="badge badge-low-stock rounded-pill px-3 py-1">
-                                            <i class="bi bi-exclamation-triangle-fill me-1"></i> LOW STOCK
-                                        </span>
+                                        <span class="status status-low">Low stock</span>
                                     <?php else: ?>
-                                        <span class="badge bg-success bg-opacity-75 rounded-pill px-3 py-1">
-                                            <i class="bi bi-check-circle-fill me-1"></i> IN STOCK
-                                        </span>
+                                        <span class="status status-ok">In stock</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="text-end fw-bold text-dark" id="subtotal-<?= $p['id'] ?>">
-                                    $<?= number_format($subtotal, 2) ?>
-                                </td>
-                                <td class="pe-4 text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-outline-primary" onclick='openEditModal(<?= json_encode($p) ?>)' title="Edit Details">
-                                            <i class="bi bi-pencil-square"></i>
+                                <td class="text-end fw-semibold" id="subtotal-<?= $p['id'] ?>">$<?= number_format($subtotal, 2) ?></td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-1">
+                                        <button class="btn btn-quiet icon-btn" onclick="openEditModal(<?= htmlspecialchars(json_encode($p), ENT_QUOTES) ?>)" title="Edit product" aria-label="Edit <?= htmlspecialchars($p['name']) ?>">
+                                            <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-outline-danger" onclick="openDeleteModal(<?= $p['id'] ?>, '<?= htmlspecialchars(addslashes($p['name'])) ?>')" title="Delete Product">
+                                        <button class="btn btn-quiet icon-btn danger" onclick="openDeleteModal(<?= (int)$p['id'] ?>, <?= htmlspecialchars(json_encode($p['name']), ENT_QUOTES) ?>)" title="Delete product" aria-label="Delete <?= htmlspecialchars($p['name']) ?>">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -302,9 +323,7 @@ $products = ProductController::index([
     </div>
 </div>
 
-<!-- ==========================================
-     MODALS (Add, Edit, Delete)
-     ========================================== -->
+<!--  MODALS (Add, Edit, Delete) -->
 
 <!-- Add Product Modal -->
 <div class="modal fade" id="addProductModal" tabindex="-1">
@@ -457,6 +476,10 @@ $products = ProductController::index([
 <script>
 let deleteTargetId = null;
 
+function money(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 // Real-time stock adjustment via AJAX to /api/products.php
 async function adjustStock(productId, delta) {
     try {
@@ -475,17 +498,34 @@ async function adjustStock(productId, delta) {
 
         if (data.status === 'success') {
             // Update UI elements in place
-            document.getElementById(`qty-val-${productId}`).innerText = data.quantity;
-            
-            // Update low-stock badge
-            const statusCell = document.getElementById(`status-badge-${productId}`);
             const row = document.getElementById(`product-row-${productId}`);
-            if (data.is_low_stock) {
-                statusCell.innerHTML = '<span class="badge badge-low-stock rounded-pill px-3 py-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> LOW STOCK</span>';
-                row.classList.add('row-low-stock');
-            } else {
-                statusCell.innerHTML = '<span class="badge bg-success bg-opacity-75 rounded-pill px-3 py-1"><i class="bi bi-check-circle-fill me-1"></i> IN STOCK</span>';
-                row.classList.remove('row-low-stock');
+            const price = parseFloat(row.dataset.price);
+            const min = parseInt(row.dataset.min, 10);
+            const oldQty = parseInt(document.getElementById(`qty-val-${productId}`).innerText, 10);
+            const newQty = parseInt(data.quantity, 10);
+            const wasLow = row.classList.contains('row-low-stock');
+            const isLow = !!data.is_low_stock;
+
+            document.getElementById(`qty-val-${productId}`).innerText = newQty;
+            document.getElementById(`subtotal-${productId}`).innerText = money(price * newQty);
+
+            const meter = document.getElementById(`meter-${productId}`);
+            meter.style.width = Math.min(100, Math.round(newQty / Math.max(1, min * 2) * 100)) + '%';
+            meter.classList.toggle('is-low', isLow);
+
+            document.getElementById(`status-badge-${productId}`).innerHTML = isLow
+                ? '<span class="status status-low">Low stock</span>'
+                : '<span class="status status-ok">In stock</span>';
+            row.classList.toggle('row-low-stock', isLow);
+
+            // Keep the summary cards in step with the change
+            const val = document.getElementById('kpi-valuation');
+            val.dataset.value = parseFloat(val.dataset.value) + price * (newQty - oldQty);
+            val.innerText = money(parseFloat(val.dataset.value));
+            if (wasLow !== isLow) {
+                const low = document.getElementById('kpi-low');
+                low.dataset.count = Math.max(0, parseInt(low.dataset.count, 10) + (isLow ? 1 : -1));
+                low.innerText = Number(low.dataset.count).toLocaleString();
             }
         } else {
             alert('Failed to update stock: ' + (data.message || 'Unknown error'));
