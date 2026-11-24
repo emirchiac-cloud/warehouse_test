@@ -41,7 +41,7 @@ $activePage = basename($_SERVER['PHP_SELF']);
                         <?= htmlspecialchars($currentUser['role']) ?>
                     </span>
                 </div>
-                <a href="logout.php" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                <a href="php/ac/logout.php" class="btn btn-outline-light btn-sm rounded-pill px-3">
                     <i class="bi bi-box-arrow-right me-1"></i> Logout
                 </a>
             </div>

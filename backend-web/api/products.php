@@ -1,6 +1,8 @@
 <?php
 // api/products.php
-// REST API endpoint for products, delegating to ProductController
+// [SPEAKER 2 PRESENTATION POINT: REST API Product Endpoints]
+// Centralized RESTful endpoint handling CRUD operations and real-time inventory adjustments.
+// Interfaced by both the Retrofit 2 Android Mobile Client and Web Portal AJAX handlers.
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -25,7 +27,8 @@ if ($rawMethod === 'POST' && isset($_POST['_method'])) {
 
 try {
     // ----------------------------------------------------
-    // 1. GET /api/products.php
+    // [SPEAKER 2 - REST ENDPOINT: GET /api/products.php]
+    // Fetches catalog JSON with computed low-stock flags and absolute image URLs
     // ----------------------------------------------------
     if ($method === 'GET') {
         if (isset($_GET['id'])) {
@@ -53,11 +56,13 @@ try {
     }
 
     // ----------------------------------------------------
-    // 2. POST /api/products.php (Create New Product)
+    // [SPEAKER 2 - REST ENDPOINT: POST /api/products.php]
+    // Receives multipart/form-data for new inventory registration (with camera/gallery photo)
     // ----------------------------------------------------
     if ($method === 'POST') {
         $userId = (int)($_POST['user_id'] ?? 1);
-        $product = ProductController::store($_POST, $_FILES, $userId, 'MOBILE');
+        $platform = $_POST['platform'] ?? 'MOBILE';
+        $product = ProductController::store($_POST, $_FILES, $userId, $platform);
 
         http_response_code(201);
         echo json_encode([
@@ -69,7 +74,8 @@ try {
     }
 
     // ----------------------------------------------------
-    // 3. PUT /api/products.php (Update Details or Adjust Stock)
+    // [SPEAKER 2 - REST ENDPOINT: PUT /api/products.php]
+    // Real-time quick stock adjustment (+1 / -1) and catalog field modifications
     // ----------------------------------------------------
     if ($method === 'PUT') {
         $input = [];
@@ -93,7 +99,7 @@ try {
 
         $userId = (int)($input['user_id'] ?? 1);
 
-        // Quick Stock Adjustment check
+        // Quick Stock Adjustment (+1, -1, or stock_delta)
         if (isset($input['delta']) || isset($input['stock_delta']) || isset($input['adjust_type'])) {
             $delta = 0;
             if (isset($input['delta'])) {
@@ -121,7 +127,8 @@ try {
         }
 
         // Full Details Update
-        $updated = ProductController::update($productId, $input, $_FILES, $userId, 'MOBILE');
+        $platform = $input['platform'] ?? 'MOBILE';
+        $updated = ProductController::update($productId, $input, $_FILES, $userId, $platform);
         http_response_code(200);
         echo json_encode([
             'status'  => 'success',
@@ -132,7 +139,8 @@ try {
     }
 
     // ----------------------------------------------------
-    // 4. DELETE /api/products.php?id=X
+    // [SPEAKER 2 - REST ENDPOINT: DELETE /api/products.php?id=X]
+    // Permanent deletion cascading to audit trail and removing image from disk
     // ----------------------------------------------------
     if ($method === 'DELETE') {
         $productId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -148,7 +156,8 @@ try {
         }
 
         $userId = (int)($_GET['user_id'] ?? 1);
-        ProductController::destroy($productId, $userId, 'MOBILE');
+        $platform = $_GET['platform'] ?? 'MOBILE';
+        ProductController::destroy($productId, $userId, $platform);
 
         http_response_code(200);
         echo json_encode([

@@ -38,7 +38,7 @@ try {
         ]);
         exit;
     } else {
-        header("Location: ../index.php");
+        header("Location: ../../index.php");
         exit;
     }
 } catch (InvalidArgumentException $e) {
@@ -48,7 +48,7 @@ try {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         exit;
     }
-    header("Location: ../login.php?error=" . urlencode($e->getMessage()));
+    header("Location: ../../login.php?error=" . urlencode($e->getMessage()));
     exit;
 } catch (RuntimeException $e) {
     if ($isJsonReq) {
@@ -57,7 +57,7 @@ try {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         exit;
     }
-    header("Location: ../login.php?error=" . urlencode($e->getMessage()));
+    header("Location: ../../login.php?error=" . urlencode($e->getMessage()));
     exit;
 } catch (Exception $e) {
     if ($isJsonReq) {
@@ -66,6 +66,6 @@ try {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         exit;
     }
-    header("Location: ../login.php?error=" . urlencode("Authentication error occurred."));
+    header("Location: ../../login.php?error=" . urlencode("Authentication error occurred."));
     exit;
 }

@@ -20,7 +20,7 @@ try {
             echo json_encode(['status' => 'success', 'data' => $product, 'message' => 'Product created successfully.']);
             exit;
         }
-        header("Location: ../index.php?msg=created");
+        header("Location: ../../index.php?msg=created");
         exit;
     } elseif ($action === 'update') {
         $id = (int)($_POST['id'] ?? 0);
@@ -30,7 +30,7 @@ try {
             echo json_encode(['status' => 'success', 'data' => $product, 'message' => 'Product updated successfully.']);
             exit;
         }
-        header("Location: ../index.php?msg=updated");
+        header("Location: ../../index.php?msg=updated");
         exit;
     } elseif ($action === 'delete') {
         $id = (int)($_POST['id'] ?? ($_GET['id'] ?? 0));
@@ -40,7 +40,7 @@ try {
             echo json_encode(['status' => 'success', 'message' => 'Product deleted successfully.']);
             exit;
         }
-        header("Location: ../index.php?msg=deleted");
+        header("Location: ../../index.php?msg=deleted");
         exit;
     } else {
         throw new InvalidArgumentException("Invalid or missing action parameter.");
@@ -52,6 +52,6 @@ try {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
         exit;
     }
-    header("Location: ../index.php?error=" . urlencode($e->getMessage()));
+    header("Location: ../../index.php?error=" . urlencode($e->getMessage()));
     exit;
 }

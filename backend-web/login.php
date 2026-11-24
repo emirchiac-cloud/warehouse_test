@@ -1,33 +1,18 @@
 <?php
 // backend-web/login.php
-// Back-Office Web Portal Login Page
+// Back-Office Web Portal Login View
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Redirect if already authenticated
+// Redirect to dashboard if already authenticated
 if (isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit;
 }
 
-require_once __DIR__ . '/php/controllers/AuthController.php';
-
 $error = $_GET['error'] ?? '';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $userInput = trim($_POST['email'] ?? ($_POST['username'] ?? ''));
-    $password  = trim($_POST['password'] ?? '');
-
-    try {
-        AuthController::login($userInput, $password);
-        header("Location: index.php");
-        exit;
-    } catch (Exception $e) {
-        $error = $e->getMessage();
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -112,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="login.php" autocomplete="off">
+        <form method="POST" action="php/ac/login_action.php" autocomplete="off">
             <div class="mb-3">
                 <label for="email" class="form-label text-secondary fw-semibold">Email or Username</label>
                 <div class="input-group">

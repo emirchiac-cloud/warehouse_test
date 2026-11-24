@@ -12,5 +12,5 @@ if (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false) {
     exit;
 }
 
-header("Location: ../login.php");
+header("Location: ../../login.php");
 exit;
