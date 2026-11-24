@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
     // 10.0.2.2 points to localhost from Android Emulator.
     // Can also be dynamically configured via SessionManager.
-    public static final String DEFAULT_BASE_URL = "http://10.0.2.2/backend-web/";
+    public static final String DEFAULT_BASE_URL = "http://192.168.0.101/backend-web/";
 
     private static Retrofit retrofit = null;
 
