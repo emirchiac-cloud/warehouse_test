@@ -8,7 +8,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.emir.warehouse.model.User;
@@ -28,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etEmail;
     private EditText etPassword;
+    private EditText etServerUrl;
     private MaterialButton btnLogin;
     private ProgressBar progressBar;
     private TextView tvServerConfig;
@@ -49,22 +49,35 @@ public class LoginActivity extends AppCompatActivity {
 
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
+        etServerUrl = findViewById(R.id.etServerUrl);
         btnLogin = findViewById(R.id.btnLogin);
         progressBar = findViewById(R.id.progressBar);
         tvServerConfig = findViewById(R.id.tvServerConfig);
 
+        // Pre-fill server URL / directory
+        etServerUrl.setText(sessionManager.getServerUrl());
+
         btnLogin.setOnClickListener(v -> performLogin());
 
-        tvServerConfig.setOnClickListener(v -> showServerConfigDialog());
+        tvServerConfig.setOnClickListener(v -> {
+            sessionManager.setServerUrl(ApiClient.DEFAULT_BASE_URL);
+            etServerUrl.setText(ApiClient.DEFAULT_BASE_URL);
+            Toast.makeText(this, "Reset to default server URL", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void performLogin() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
+        String serverUrl = etServerUrl.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please enter email and password", Toast.LENGTH_SHORT).show();
             return;
+        }
+
+        if (!serverUrl.isEmpty()) {
+            sessionManager.setServerUrl(serverUrl);
         }
 
         progressBar.setVisibility(View.VISIBLE);
@@ -113,25 +126,5 @@ public class LoginActivity extends AppCompatActivity {
         intent.putExtra("EXTRA_USER_ROLE", role);
         startActivity(intent);
         finish();
-    }
-
-    private void showServerConfigDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Server Backend URL");
-
-        final EditText input = new EditText(this);
-        input.setText(sessionManager.getServerUrl());
-        input.setPadding(32, 24, 32, 24);
-        builder.setView(input);
-
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String url = input.getText().toString().trim();
-            if (!url.isEmpty()) {
-                sessionManager.setServerUrl(url);
-                Toast.makeText(this, "Server URL updated", Toast.LENGTH_SHORT).show();
-            }
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
-        builder.show();
     }
 }
