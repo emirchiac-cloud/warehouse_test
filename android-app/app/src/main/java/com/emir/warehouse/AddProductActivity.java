@@ -48,6 +48,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * [SPEAKER 4 - WORKFLOW 3: New Inventory Registration with Camera/Gallery Photo Capture]
+ * Handles product creation form with camera/gallery image picker and multipart Retrofit upload.
+ */
 public class AddProductActivity extends AppCompatActivity {
 
     private ImageView imgPreview;

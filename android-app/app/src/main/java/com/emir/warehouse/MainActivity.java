@@ -162,6 +162,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
     }
 
     /**
+     * [SPEAKER 4 - WORKFLOW 2: Product Catalog & Asynchronous Caching]
      * Fetch products asynchronously via Retrofit (GET) and bind the parsed JSON list to RecyclerView
      */
     private void loadProducts(String searchQuery) {

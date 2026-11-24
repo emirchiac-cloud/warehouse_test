@@ -26,6 +26,7 @@ public class HardwareAlertHelper {
     public static final String CHANNEL_ID = "warehouse_low_stock_channel";
 
     /**
+     * [SPEAKER 4 - WORKFLOW 5: Hardware Feedback & Low-Stock Alerts]
      * Triggers both Hardware Vibration (500ms) and Local Android System Notification
      * when a product drops below its safe minimum threshold.
      */

@@ -157,6 +157,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     }
 
     /**
+     * [SPEAKER 4 - WORKFLOW 4: Product Detail & Quick Stock Adjustments]
      * Quick +1 and -1 stock adjustment buttons that send an asynchronous PUT request
      * to update the stock count in MySQL (Workflow 4)
      */

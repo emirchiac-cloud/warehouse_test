@@ -1,3 +1,9 @@
 RewriteEngine On
+
+# Allow direct access to API endpoints without rewriting
+RewriteCond %{REQUEST_URI} /api/ [NC]
+RewriteRule .* - [L]
+
+# Web portal routing rules
 RewriteBase /warehouse/
 RewriteRule ^backend-web/(.*)$ $1 [QSA,L]
