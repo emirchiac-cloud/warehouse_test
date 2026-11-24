@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,14 +28,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.emir.warehouse.adapter.ProductAdapter;
+import com.emir.warehouse.model.ApiResponse;
 import com.emir.warehouse.model.Product;
 import com.emir.warehouse.network.ApiClient;
 import com.emir.warehouse.network.ApiService;
 import com.emir.warehouse.util.SessionManager;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -44,11 +48,19 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
 
     private Toolbar toolbar;
     private TextView tvWelcomeHeader;
+    private TextView tvSummarySubtitle;
+    private TextView tvSummaryTotalSkus;
+    private TextView tvSummaryValue;
+    private TextView tvSummaryRestock;
+    private TextView tvShownCount;
+    private MaterialButton btnHeaderAdd;
+    private MaterialButton btnHeaderReport;
+    private Spinner spinnerCategory;
     private EditText etSearch;
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView recyclerViewProducts;
     private ProgressBar loadingIndicator;
-    private TextView tvEmptyState;
+    private View tvEmptyState;
     private FloatingActionButton fabAddProduct;
 
     private ProductAdapter adapter;
@@ -76,6 +88,14 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
         setSupportActionBar(toolbar);
 
         tvWelcomeHeader = findViewById(R.id.tvWelcomeHeader);
+        tvSummarySubtitle = findViewById(R.id.tvSummarySubtitle);
+        tvSummaryTotalSkus = findViewById(R.id.tvSummaryTotalSkus);
+        tvSummaryValue = findViewById(R.id.tvSummaryValue);
+        tvSummaryRestock = findViewById(R.id.tvSummaryRestock);
+        tvShownCount = findViewById(R.id.tvShownCount);
+        btnHeaderAdd = findViewById(R.id.btnHeaderAdd);
+        btnHeaderReport = findViewById(R.id.btnHeaderReport);
+        spinnerCategory = findViewById(R.id.spinnerCategory);
         etSearch = findViewById(R.id.etSearch);
         swipeRefresh = findViewById(R.id.swipeRefresh);
         recyclerViewProducts = findViewById(R.id.recyclerViewProducts);
@@ -92,7 +112,9 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
         }
         String formattedRole = (userRole != null && !userRole.isEmpty()) ? 
                 Character.toUpperCase(userRole.charAt(0)) + userRole.substring(1) : "Staff";
-        tvWelcomeHeader.setText(String.format("Welcome, %s (%s)", userName, formattedRole));
+        if (tvWelcomeHeader != null) {
+            tvWelcomeHeader.setText(String.format("Welcome, %s (%s)", userName, formattedRole));
+        }
 
         // Setup RecyclerView
         recyclerViewProducts.setLayoutManager(new LinearLayoutManager(this));
@@ -114,11 +136,17 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
             public void afterTextChanged(Editable s) {}
         });
 
-        // FAB to register new inventory (Workflow 3)
-        fabAddProduct.setOnClickListener(v -> {
+        // FAB & Header Add buttons to register new inventory
+        View.OnClickListener addListener = v -> {
             Intent intent = new Intent(MainActivity.this, AddProductActivity.class);
             productActivityLauncher.launch(intent);
-        });
+        };
+        fabAddProduct.setOnClickListener(addListener);
+        btnHeaderAdd.setOnClickListener(addListener);
+
+        btnHeaderReport.setOnClickListener(v -> 
+            Toast.makeText(MainActivity.this, "Export report feature available in web portal", Toast.LENGTH_SHORT).show()
+        );
 
         // Load initial products from API
         loadProducts(null);
@@ -150,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
                 if (response.isSuccessful() && response.body() != null) {
                     allProducts = response.body();
                     adapter.setProducts(allProducts);
+                    updateSummaryCards(allProducts);
 
                     if (allProducts.isEmpty()) {
                         tvEmptyState.setVisibility(View.VISIBLE);
@@ -173,9 +202,34 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
         });
     }
 
+    private void updateSummaryCards(List<Product> products) {
+        int totalSkus = products.size();
+        double totalVal = 0;
+        int restockCount = 0;
+        for (Product p : products) {
+            totalVal += (p.getUnitPrice() * p.getQuantity());
+            if (p.isLowStock()) {
+                restockCount++;
+            }
+        }
+        if (tvSummaryTotalSkus != null) {
+            tvSummaryTotalSkus.setText(String.valueOf(totalSkus));
+        }
+        if (tvSummaryValue != null) {
+            tvSummaryValue.setText(String.format(Locale.US, "$%.2f", totalVal));
+        }
+        if (tvSummaryRestock != null) {
+            tvSummaryRestock.setText(String.valueOf(restockCount));
+        }
+        if (tvShownCount != null) {
+            tvShownCount.setText(String.format(Locale.US, "Showing %d products", totalSkus));
+        }
+    }
+
     private void filterProducts(String query) {
         if (query == null || query.trim().isEmpty()) {
             adapter.setProducts(allProducts);
+            updateSummaryCards(allProducts);
             return;
         }
         String lower = query.toLowerCase().trim();
@@ -188,6 +242,7 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
             }
         }
         adapter.setProducts(filtered);
+        updateSummaryCards(filtered);
     }
 
     /**
@@ -199,6 +254,41 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
         Intent intent = new Intent(MainActivity.this, ProductDetailActivity.class);
         intent.putExtra("EXTRA_PRODUCT", product);
         productActivityLauncher.launch(intent);
+    }
+
+    @Override
+    public void onPlusClick(Product product) {
+        ApiService apiService = ApiClient.getService(this);
+        apiService.adjustStock("PUT", product.getId(), 1, sessionManager.getUserId(), "MOBILE")
+                .enqueue(new Callback<ApiResponse>() {
+                    @Override
+                    public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+                        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                            int newQty = response.body().getQuantity();
+                            product.setQuantity(newQty);
+                            adapter.notifyDataSetChanged();
+                            updateSummaryCards(allProducts);
+                            Toast.makeText(MainActivity.this, "Stock updated to " + newQty, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Failed to update stock", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ApiResponse> call, Throwable t) {
+                        Toast.makeText(MainActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    @Override
+    public void onEditClick(Product product) {
+        onProductClick(product);
+    }
+
+    @Override
+    public void onDeleteClick(Product product) {
+        onProductClick(product);
     }
 
     @Override
@@ -250,14 +340,14 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
         builder.setView(input);
 
         builder.setPositiveButton("Save", (dialog, which) -> {
-            String url = input.getText().toString().trim();
-            if (!url.isEmpty()) {
-                sessionManager.setServerUrl(url);
-                loadProducts(null);
+            String newUrl = input.getText().toString().trim();
+            if (!newUrl.isEmpty()) {
+                sessionManager.setServerUrl(newUrl);
                 Toast.makeText(this, "Server URL updated", Toast.LENGTH_SHORT).show();
+                loadProducts(null);
             }
         });
-        builder.setNegativeButton("Cancel", null);
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         builder.show();
     }
 }

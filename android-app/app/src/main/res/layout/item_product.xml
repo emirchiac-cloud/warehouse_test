@@ -5,10 +5,11 @@
     android:id="@+id/cardProduct"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="12dp"
+    android:layout_marginHorizontal="0dp"
     android:layout_marginVertical="6dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="@color/white"
     app:strokeWidth="1dp"
     app:strokeColor="@color/card_border">
 
@@ -18,19 +19,39 @@
         android:layout_height="wrap_content"
         android:padding="12dp">
 
-        <!-- Product Image Thumbnail (Picasso Target) -->
-        <ImageView
-            android:id="@+id/imgProductThumb"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:scaleType="centerCrop"
-            android:background="@drawable/image_placeholder"
-            android:contentDescription="Product Image"
-            app:layout_constraintStart_toStartOf="parent"
+        <!-- 3dp red strip on left edge for low stock -->
+        <View
+            android:id="@+id/viewLowStockStrip"
+            android:layout_width="3dp"
+            android:layout_height="0dp"
+            android:background="@color/stock_low"
+            android:visibility="gone"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <!-- Product Name -->
+        <!-- Thumbnail 46dp, 12dp corners, pink placeholder #FDE4E6 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThumb"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/stock_low_bg"
+            app:strokeWidth="0dp"
+            app:layout_constraintStart_toEndOf="@id/viewLowStockStrip"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="4dp">
+
+            <ImageView
+                android:id="@+id/imgProductThumb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="Product image thumbnail" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Product Name (semibold) -->
         <TextView
             android:id="@+id/tvProductName"
             android:layout_width="0dp"
@@ -41,66 +62,163 @@
             android:textColor="@color/text_primary"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:maxLines="2"
+            android:maxLines="1"
             android:ellipsize="end"
-            app:layout_constraintStart_toEndOf="@id/imgProductThumb"
-            app:layout_constraintEnd_toStartOf="@id/tvStockStatusBadge"
+            app:layout_constraintStart_toEndOf="@id/cardThumb"
+            app:layout_constraintEnd_toStartOf="@id/tvProductPrice"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Category & SKU -->
+        <!-- SKU in small grey text and category as small chip -->
         <TextView
             android:id="@+id/tvProductMeta"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="2dp"
-            android:text="Category • SKU"
+            android:text="SKU • Category"
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
-            app:layout_constraintStart_toEndOf="@id/imgProductThumb"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cardThumb"
+            app:layout_constraintEnd_toStartOf="@id/tvProductPrice"
             app:layout_constraintTop_toBottomOf="@id/tvProductName" />
 
-        <!-- Unit Price -->
+        <!-- Unit Price on the right -->
         <TextView
             android:id="@+id/tvProductPrice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="6dp"
             android:text="$0.00"
-            android:textColor="@color/accent_blue"
+            android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/imgProductThumb"
-            app:layout_constraintTop_toBottomOf="@id/tvProductMeta" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Current Quantity Count -->
-        <TextView
-            android:id="@+id/tvStockCount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Stock: 0 units"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@id/tvProductPrice"
-            app:layout_constraintTop_toTopOf="@id/tvProductPrice"
-            app:layout_constraintBottom_toBottomOf="@id/tvProductPrice" />
-
-        <!-- Low Stock / In Stock Badge -->
+        <!-- Status pill: "In stock" or "Low stock" (no icons, no all-caps) -->
         <TextView
             android:id="@+id/tvStockStatusBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="LOW STOCK"
-            android:textColor="@color/white"
-            android:textSize="10sp"
-            android:textStyle="bold"
-            android:background="@drawable/badge_low_stock"
+            android:text="In stock"
+            android:textColor="@color/stock_ok"
+            android:textSize="11sp"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="2dp"
+            android:background="@drawable/badge_in_stock"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/tvProductPrice"
+            android:layout_marginTop="4dp" />
+
+        <!-- Quantity & "+" button (30dp rounded square, grey fill #F3F3F3) -->
+        <LinearLayout
+            android:id="@+id/layoutQuantitySection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp"
+            app:layout_constraintStart_toStartOf="@id/cardThumb"
+            app:layout_constraintTop_toBottomOf="@id/cardThumb">
+
+            <TextView
+                android:id="@+id/tvStockCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Qty: 0"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Single "+" button, 30dp rounded square, grey fill -->
+            <ImageButton
+                android:id="@+id/btnPlus"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/image_placeholder"
+                android:backgroundTint="@color/chip_bg"
+                android:src="@android:drawable/ic_input_add"
+                app:tint="@color/text_primary"
+                android:contentDescription="Increment stock quantity by one"
+                android:minWidth="48dp"
+                android:minHeight="48dp" />
+        </LinearLayout>
+
+        <!-- Thin 8dp progress bar under quantity: charcoal normally, red when quantity < min -->
+        <ProgressBar
+            android:id="@+id/progressStock"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="12dp"
+            android:max="100"
+            android:progress="50"
+            android:progressDrawable="@drawable/image_placeholder"
+            app:layout_constraintStart_toStartOf="@id/layoutQuantitySection"
+            app:layout_constraintEnd_toStartOf="@id/layoutActionButtons"
+            app:layout_constraintTop_toBottomOf="@id/layoutQuantitySection" />
+
+        <!-- Small "min. N" caption below progress bar -->
+        <TextView
+            android:id="@+id/tvMinCaption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="min. 5"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:layout_marginTop="2dp"
+            app:layout_constraintStart_toStartOf="@id/progressStock"
+            app:layout_constraintTop_toBottomOf="@id/progressStock" />
+
+        <!-- Line value (price x quantity) in semibold -->
+        <TextView
+            android:id="@+id/tvLineValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total: $0.00"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvStockStatusBadge"
+            android:layout_marginTop="6dp" />
+
+        <!-- Edit and delete as 34dp icon buttons with grey fill -->
+        <LinearLayout
+            android:id="@+id/layoutActionButtons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/image_placeholder"
+                android:backgroundTint="@color/chip_bg"
+                android:src="@android:drawable/ic_menu_edit"
+                app:tint="@color/text_primary"
+                android:contentDescription="Edit product details"
+                android:layout_marginEnd="6dp"
+                android:minWidth="48dp"
+                android:minHeight="48dp" />
+
+            <ImageButton
+                android:id="@+id/btnDelete"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:background="@drawable/image_placeholder"
+                android:backgroundTint="@color/chip_bg"
+                android:src="@android:drawable/ic_menu_delete"
+                app:tint="@color/text_primary"
+                android:contentDescription="Delete product"
+                android:minWidth="48dp"
+                android:minHeight="48dp" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
