@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -195,7 +196,8 @@ public class MainActivity extends AppCompatActivity implements ProductAdapter.On
             public void onFailure(Call<List<Product>> call, Throwable t) {
                 loadingIndicator.setVisibility(View.GONE);
                 swipeRefresh.setRefreshing(false);
-                Toast.makeText(MainActivity.this, "Network error: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e("ProductsLoadError", "Failed to parse products", t);
+                Toast.makeText(MainActivity.this, "Error: " + t.getClass().getSimpleName() + " - " + t.getMessage(), Toast.LENGTH_LONG).show();
                 if (allProducts.isEmpty()) {
                     tvEmptyState.setVisibility(View.VISIBLE);
                 }
